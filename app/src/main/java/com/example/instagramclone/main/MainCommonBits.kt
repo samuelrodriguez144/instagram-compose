@@ -21,6 +21,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
+import coil.annotation.ExperimentalCoilApi
 import coil.compose.ImagePainter
 import coil.compose.rememberImagePainter
 import com.example.instagramclone.DestinationScreen
@@ -70,6 +71,7 @@ fun navigateTo(navController: NavController,dest: DestinationScreen){
     }
 
 }
+@OptIn(ExperimentalCoilApi::class)
 @Composable
 fun CommonImage(
     data:String?,
