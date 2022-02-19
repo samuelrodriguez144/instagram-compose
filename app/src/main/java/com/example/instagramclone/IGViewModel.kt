@@ -1,6 +1,7 @@
 package com.example.instagramclone
 
 
+import android.net.Uri
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import com.example.instagramclone.data.Event
@@ -12,6 +13,7 @@ import java.lang.Exception
 import javax.inject.Inject
 import com.example.instagramclone.data.UserData
 import com.google.firebase.firestore.ktx.toObject
+import java.util.*
 
 
 const val USERS = "users"
@@ -116,18 +118,18 @@ class IGViewModel @Inject constructor(
             following = userData.value?.following
         )
 
-        uid?.let {
+        uid?.let { it ->
             inProgress.value = true
             db.collection(USERS).document(it).get()
-                .addOnSuccessListener {
-                    if(it.exists()){
-                        it.reference.update(UserData().toMap())
+                .addOnSuccessListener { task ->
+                    if(task.exists()){
+                        task.reference.update(userData.toMap())
                             .addOnSuccessListener {
-                                this.userData.value = UserData()
+                                this.userData.value = userData
                                 inProgress.value = false
                             }
                             .addOnFailureListener { error ->
-                                handleExecption(error,"Cannot Udpate User")
+                                handleExecption(error,"Cannot Update User")
                                 inProgress.value = false
                             }
                     }
@@ -165,4 +167,40 @@ class IGViewModel @Inject constructor(
         val message = if(customMessage.isEmpty()) errorMessage else "$customMessage: $errorMessage"
         popupNotification.value = Event(message)
     }
+
+    fun updateProfileData(name:String,username:String,bio:String){
+        createOrUpdateProfile(name, username,bio)
+    }
+
+    private fun uploadImage(uri: Uri, onSuccess: (Uri) -> Unit){
+        inProgress.value = true
+        val storageRef =  storage.reference
+        val uuid= UUID.randomUUID()
+        val imageRef = storageRef.child("images/$uuid")
+        val uploadTask = imageRef.putFile(uri)
+
+        uploadTask
+            .addOnSuccessListener {
+                val result = it.metadata?.reference?.downloadUrl
+                result?.addOnSuccessListener (onSuccess)
+            }
+            .addOnFailureListener{
+                handleExecption(it,"Cannot upload image")
+                inProgress.value = false
+            }
+    }
+
+    fun uploadProfileImage(uri:Uri){
+        uploadImage(uri){
+            createOrUpdateProfile(imageUrl = it.toString())
+        }
+    }
+
+    fun onLogout(){
+        auth.signOut()
+        isSignedIn.value = false
+        userData.value = null
+        popupNotification.value = Event("Logged Out.")
+    }
+
 }

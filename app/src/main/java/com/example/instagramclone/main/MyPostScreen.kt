@@ -12,7 +12,6 @@ import androidx.compose.material.Card
 import androidx.compose.material.OutlinedButton
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Alignment.Companion.BottomEnd
 import androidx.compose.ui.Alignment.Companion.CenterVertically
 import androidx.compose.ui.Modifier
@@ -22,6 +21,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
+import com.example.instagramclone.DestinationScreen
 import com.example.instagramclone.IGViewModel
 import com.example.instagramclone.R
 
@@ -60,7 +60,9 @@ fun MyPostScreen(navController: NavController,vm:IGViewModel){
                 Text(text = userData?.bio ?: "")
             }
 
-            OutlinedButton(onClick = {  },
+            OutlinedButton(onClick = {
+                navigateTo(navController = navController, dest = DestinationScreen.MyProfile)
+            },
             modifier = Modifier
                 .padding(8.dp)
                 .fillMaxWidth(),
