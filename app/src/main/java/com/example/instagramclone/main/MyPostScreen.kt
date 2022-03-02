@@ -1,5 +1,8 @@
 package com.example.instagramclone.main
 
+import android.net.Uri
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -26,8 +29,18 @@ import com.example.instagramclone.IGViewModel
 import com.example.instagramclone.R
 
 
+
 @Composable
 fun MyPostScreen(navController: NavController,vm:IGViewModel){
+
+    val newPostImageLauncher = rememberLauncherForActivityResult(contract = ActivityResultContracts.GetContent()){ uri ->
+        uri?.let {
+            val encodedImage = Uri.encode(it.toString())
+            val route = DestinationScreen.NewPost.createRoute(encodedImage)
+            navController.navigate(route)
+        }
+
+    }
     val userData = vm.userData.value
     val isLoading = vm.inProgress.value
     
@@ -35,7 +48,7 @@ fun MyPostScreen(navController: NavController,vm:IGViewModel){
         Column(modifier = Modifier.weight(1f)) {
             Row() {
                 ProfileImage(userData?.imageUrl){
-                    
+                    newPostImageLauncher.launch("image/*")
                 }
                 Text(text = "15\nPosts",
                     modifier = Modifier
