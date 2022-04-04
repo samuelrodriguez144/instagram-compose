@@ -156,8 +156,7 @@ fun ProfileImage(imageUrl:String?, onclick: ()->Unit){
 
         Card(shape = CircleShape,
             border = BorderStroke(width = 2.dp, color = Color.White),
-            modifier = Modifier
-                .size(32.dp)
+            modifier = Modifier                .size(32.dp)
                 .align(BottomEnd)
                 .padding(bottom = 8.dp, end = 8.dp)) {
             

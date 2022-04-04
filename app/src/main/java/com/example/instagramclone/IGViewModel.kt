@@ -2,25 +2,21 @@ package com.example.instagramclone
 
 
 import android.net.Uri
-import android.util.Log
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import com.example.instagramclone.data.Event
 import com.example.instagramclone.data.PostData
-import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.firestore.FirebaseFirestore
-import com.google.firebase.storage.FirebaseStorage
-import dagger.hilt.android.lifecycle.HiltViewModel
-import java.lang.Exception
-import javax.inject.Inject
 import com.example.instagramclone.data.UserData
-import com.google.common.collect.Lists
+import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.DocumentReference
+import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.QuerySnapshot
 import com.google.firebase.firestore.ktx.toObject
+import com.google.firebase.storage.FirebaseStorage
+import dagger.hilt.android.lifecycle.HiltViewModel
 import java.util.*
-import kotlin.math.log
+import javax.inject.Inject
 
 
 const val USERS = "users"
@@ -39,6 +35,9 @@ class IGViewModel @Inject constructor(
 
     val  refreshPostProgress  = mutableStateOf(false)
     val post = mutableStateOf<List<PostData>>(listOf())
+
+    val searchedPost = mutableStateOf<List<PostData>>(listOf())
+    val searchedPostProgress = mutableStateOf(false)
 
     init {
         val currentUser = auth.currentUser
@@ -253,6 +252,12 @@ class IGViewModel @Inject constructor(
         val currentUsername = userData.value?.username
         val currentUserImage = userData.value?.imageUrl
 
+        val fillerWords = listOf("is","the","be","a","in","it","or","and")
+        val searchTerms = description
+            .split(" ",".","?","!","#")
+            .map { it.lowercase() }
+            .filter { it.isNotEmpty() and !fillerWords.contains(it) }
+
         if(currentUid != null){
             val postUid = UUID.randomUUID().toString()
             val post = PostData(
@@ -263,7 +268,8 @@ class IGViewModel @Inject constructor(
                 postImage = imageUri.toString(),
                 postDescription = description,
                 time = System.currentTimeMillis(),
-                likes = listOf<String>()
+                likes = listOf<String>(),
+                searchTerms = searchTerms
             )
             db.collection(POST).document(postUid).set(post)
                 .addOnSuccessListener {
@@ -313,6 +319,22 @@ class IGViewModel @Inject constructor(
         }
         val sortedPost = newPost.sortedByDescending { it.time }
         outState.value = sortedPost
+    }
 
+    fun searchPost(searchedTerm:String){
+        if(searchedTerm.isNotEmpty()){
+            searchedPostProgress.value = true
+            db
+                .collection(POST)
+                .whereArrayContains("searchTerms",searchedTerm.trim().lowercase())
+                .get().addOnSuccessListener {
+                    convertPosts(it,searchedPost)
+                    searchedPostProgress.value = false
+                }
+                .addOnFailureListener { exec ->
+                    handleExecption(exec,"Cannot Search Post")
+                    searchedPostProgress.value = false
+                }
+        }
     }
 }
