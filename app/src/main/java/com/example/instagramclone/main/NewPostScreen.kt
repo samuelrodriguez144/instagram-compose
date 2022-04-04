@@ -20,6 +20,7 @@ import androidx.navigation.NavController
 import coil.compose.rememberImagePainter
 import com.example.instagramclone.IGViewModel
 
+
 @Composable
 fun NewPostScreen(navController: NavController,vm:IGViewModel,encodedUri:String){
     val imageUri by remember {
@@ -75,3 +76,4 @@ fun NewPostScreen(navController: NavController,vm:IGViewModel,encodedUri:String)
         CommonProgressSpinner()
     }
 }
+
