@@ -121,8 +121,11 @@ fun MyPostScreen(navController: NavController,vm:IGViewModel){
                     postLoading = postLoading,
                     posts = posts ,
                     modifier = Modifier.weight(1f).padding(1.dp).fillMaxSize()
-                ){
-                    // on post click
+                ){ post ->
+                    navigateTo(
+                        navController = navController,
+                        DestinationScreen.SinglePost,
+                        NavParams("posts",post))
                 }
             }
 

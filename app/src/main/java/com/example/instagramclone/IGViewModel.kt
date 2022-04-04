@@ -16,6 +16,7 @@ import java.lang.Exception
 import javax.inject.Inject
 import com.example.instagramclone.data.UserData
 import com.google.common.collect.Lists
+import com.google.firebase.firestore.DocumentReference
 import com.google.firebase.firestore.QuerySnapshot
 import com.google.firebase.firestore.ktx.toObject
 import java.util.*
@@ -203,7 +204,34 @@ class IGViewModel @Inject constructor(
     fun uploadProfileImage(uri:Uri){
         uploadImage(uri){
             createOrUpdateProfile(imageUrl = it.toString())
+            updatePostUserImageData(it.toString())
         }
+    }
+
+    private fun updatePostUserImageData(imageUrl: String){
+        val currentUid = auth.currentUser?.uid
+        db.collection(POST).whereEqualTo("userId",currentUid).get()
+            .addOnSuccessListener {
+                val posts = mutableStateOf<List<PostData>>(arrayListOf())
+                convertPosts(it,posts)
+                val refs = arrayListOf<DocumentReference>()
+                for(post in posts.value){
+                    post.postId?.let { id->
+                        refs.add(db.collection(POST).document(id))
+                    }
+                }
+                if(refs.isNotEmpty()){
+                    db.runBatch{ batch ->
+                        for(ref in refs){
+                            batch.update(ref,"userImage",imageUrl)
+                        }
+                    }
+                        .addOnSuccessListener {
+                            refreshPost()
+                        }
+                }
+
+            }
     }
 
     fun onLogout(){
@@ -234,7 +262,8 @@ class IGViewModel @Inject constructor(
                 userImage = currentUserImage,
                 postImage = imageUri.toString(),
                 postDescription = description,
-                time = System.currentTimeMillis()
+                time = System.currentTimeMillis(),
+                likes = listOf<String>()
             )
             db.collection(POST).document(postUid).set(post)
                 .addOnSuccessListener {
