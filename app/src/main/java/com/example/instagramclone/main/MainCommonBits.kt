@@ -1,6 +1,5 @@
 package com.example.instagramclone.main
 
-import android.os.Parcelable
 import android.widget.Toast
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -66,14 +65,7 @@ fun CheckSignedIn(navController: NavController,vm: IGViewModel){
     }
 }
 
-data class NavParams(
-    val name:String,
-    val value:Parcelable
-)
-fun navigateTo(navController: NavController,dest: DestinationScreen, vararg params:NavParams){
-    for (param in params){
-        navController.currentBackStackEntry?.arguments?.putParcelable(param.name,param.value)
-    }
+fun navigateTo(navController: NavController,dest: DestinationScreen){
     navController.navigate(dest.route){
         popUpTo(dest.route)
         launchSingleTop = true
