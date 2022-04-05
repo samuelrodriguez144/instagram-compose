@@ -50,13 +50,27 @@ fun SinglePostDisplay(navController: NavController,vm: IGViewModel,post: PostDat
             Text(text = post.username ?: "")
             Text(text = " . ", Modifier.padding(8.dp))
 
-            if(userData?.userId == post.userId){
-                // Current User Post don't show anything
-            }
-            else{
-                Text(text = "Follow", color = Color.Blue , modifier = Modifier.clickable {
-                    // Follow a user
-                })
+            when {
+                userData?.userId == post.userId -> {
+                    // Current User Post don't show anything
+                }
+                userData?.following?.contains(post.userId) == true -> {
+
+                    Text(
+                        text = "Following",
+                        color = Color.Gray ,
+                        modifier = Modifier.clickable {
+                        vm.onFollowClick(post.userId!!)
+                    })
+                }
+                else -> {
+                    Text(
+                        text = "Follow",
+                        color = Color.Blue ,
+                        modifier = Modifier.clickable {
+                        vm.onFollowClick(post.userId!!)
+                    })
+                }
             }
         }
 
