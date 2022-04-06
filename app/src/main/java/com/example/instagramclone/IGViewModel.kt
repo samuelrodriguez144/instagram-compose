@@ -2,29 +2,28 @@ package com.example.instagramclone
 
 
 import android.net.Uri
-import android.util.Log
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
+import com.example.instagramclone.data.CommentData
 import com.example.instagramclone.data.Event
 import com.example.instagramclone.data.PostData
-import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.firestore.FirebaseFirestore
-import com.google.firebase.storage.FirebaseStorage
-import dagger.hilt.android.lifecycle.HiltViewModel
-import java.lang.Exception
-import javax.inject.Inject
 import com.example.instagramclone.data.UserData
-import com.google.common.collect.Lists
+import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.DocumentReference
+import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.QuerySnapshot
 import com.google.firebase.firestore.ktx.toObject
+import com.google.firebase.storage.FirebaseStorage
+import dagger.hilt.android.lifecycle.HiltViewModel
 import java.util.*
-import kotlin.math.log
+import javax.inject.Inject
 
 
 const val USERS = "users"
 const val POST = "posts"
+const val COMMENTS = "comments"
+
 @HiltViewModel
 class IGViewModel @Inject constructor(
     val auth: FirebaseAuth,
@@ -39,6 +38,17 @@ class IGViewModel @Inject constructor(
 
     val  refreshPostProgress  = mutableStateOf(false)
     val post = mutableStateOf<List<PostData>>(listOf())
+
+    val searchedPost = mutableStateOf<List<PostData>>(listOf())
+    val searchedPostProgress = mutableStateOf(false)
+
+    val postFeed = mutableStateOf<List<PostData>>(listOf())
+    val postFeedProgress = mutableStateOf(false)
+
+    val comments = mutableStateOf<List<CommentData>>(listOf())
+    val commentProgress = mutableStateOf(false)
+
+    val followers = mutableStateOf(0)
 
     init {
         val currentUser = auth.currentUser
@@ -165,6 +175,8 @@ class IGViewModel @Inject constructor(
                 userData.value = user
                 inProgress.value = false
                 refreshPost()
+                getPersonalizedFeed()
+                getFollowers(user?.userId)
             }
             .addOnFailureListener {
                 handleExecption(it,"Cannot retrieve user data")
@@ -239,6 +251,10 @@ class IGViewModel @Inject constructor(
         isSignedIn.value = false
         userData.value = null
         popupNotification.value = Event("Logged Out.")
+        searchedPost.value = listOf()
+        postFeed.value = listOf()
+        comments.value = listOf()
+
     }
 
     fun onNewPost(uri:Uri, description:String, onPostSuccess:()->Unit){
@@ -253,6 +269,12 @@ class IGViewModel @Inject constructor(
         val currentUsername = userData.value?.username
         val currentUserImage = userData.value?.imageUrl
 
+        val fillerWords = listOf("is","the","be","a","in","it","or","and")
+        val searchTerms = description
+            .split(" ",".","?","!","#")
+            .map { it.lowercase() }
+            .filter { it.isNotEmpty() and !fillerWords.contains(it) }
+
         if(currentUid != null){
             val postUid = UUID.randomUUID().toString()
             val post = PostData(
@@ -263,7 +285,8 @@ class IGViewModel @Inject constructor(
                 postImage = imageUri.toString(),
                 postDescription = description,
                 time = System.currentTimeMillis(),
-                likes = listOf<String>()
+                likes = listOf<String>(),
+                searchTerms = searchTerms
             )
             db.collection(POST).document(postUid).set(post)
                 .addOnSuccessListener {
@@ -313,6 +336,161 @@ class IGViewModel @Inject constructor(
         }
         val sortedPost = newPost.sortedByDescending { it.time }
         outState.value = sortedPost
+    }
 
+    fun searchPost(searchedTerm:String){
+        if(searchedTerm.isNotEmpty()){
+            searchedPostProgress.value = true
+            db
+                .collection(POST)
+                .whereArrayContains("searchTerms",searchedTerm.trim().lowercase())
+                .get().addOnSuccessListener {
+                    convertPosts(it,searchedPost)
+                    searchedPostProgress.value = false
+                }
+                .addOnFailureListener { exec ->
+                    handleExecption(exec,"Cannot Search Post")
+                    searchedPostProgress.value = false
+                }
+        }
+    }
+
+    fun onFollowClick(userId:String){
+        auth.currentUser?.uid?.let { currentUser ->
+            val following = arrayListOf<String>()
+            userData.value?.following?.let {
+                following.addAll(it)
+            }
+            if(following.contains(userId)){
+                following.remove(userId)
+            }
+            else{
+                following.add(userId)
+            }
+            db
+                .collection(USERS)
+                .document(currentUser)
+                .update("following",following)
+                .addOnSuccessListener {
+                    getUserData(currentUser)
+                }
+        }
+    }
+
+    private fun getPersonalizedFeed(){
+        val following = userData.value?.following
+        postFeedProgress.value = true
+        if(!following.isNullOrEmpty()){
+            db.collection(POST).whereIn("userId",following).get()
+                .addOnSuccessListener {
+
+                    convertPosts(documents = it, outState = postFeed)
+                    if(postFeed.value.isEmpty()){
+                        getGeneralFeed()
+                    }
+                    else{
+                        postFeedProgress.value = false
+                    }
+                }
+                .addOnFailureListener {
+                    handleExecption(it,"Can't retrieve feed")
+                    postFeedProgress.value = false
+                }
+        }
+        else{
+            getGeneralFeed()
+        }
+    }
+
+    private fun getGeneralFeed(){
+        postFeedProgress.value = true
+        val currentTime = System.currentTimeMillis()
+        val difference = 24 * 60 * 60 * 1000
+        db.collection(POST).whereGreaterThan("time",currentTime - difference)
+            .get()
+            .addOnSuccessListener {
+                convertPosts(documents = it, outState = postFeed)
+                postFeedProgress.value = false
+            }
+            .addOnFailureListener {
+                handleExecption(it,"can't retrieve feed")
+                postFeedProgress.value = false
+            }
+    }
+
+    fun onLikePost(postData:PostData){
+        auth.currentUser?.uid?.let { userId ->
+            postData.likes?.let { likes ->
+                val newLikes = arrayListOf<String>()
+                if(likes.contains(userId)){
+                    newLikes.addAll(likes.filter { userId != it })
+                }
+                else{
+                    newLikes.addAll(likes)
+                    newLikes.add(userId)
+                }
+                postData.postId?.let { postId ->
+                    db.collection(POST).document(postId).update("likes",newLikes)
+                        .addOnSuccessListener {
+                            postData.likes = newLikes
+                        }
+                        .addOnFailureListener {
+                            handleExecption(it,"Unable to like post")
+                        }
+                }
+            }
+        }
+    }
+
+    fun createComments(postId:String,text:String){
+        userData.value?.username?.let { userName ->
+            val commentId = UUID.randomUUID().toString()
+            val comment = CommentData(
+                commentId = commentId,
+                postId = postId,
+                userName = userName,
+                text = text,
+                timeStamp = System.currentTimeMillis()
+            )
+
+            db.collection(COMMENTS).document(commentId).set(comment)
+                .addOnSuccessListener {
+                    // get existing comment
+                    getComments(postId = postId)
+                }
+                .addOnFailureListener {
+                    handleExecption(it,"Failed to add comment")
+                }
+        }
+    }
+
+    fun getComments(postId: String?){
+        commentProgress.value = true
+        db.collection(COMMENTS).whereEqualTo("postId",postId).get()
+            .addOnSuccessListener { documents ->
+                val newComments = mutableListOf<CommentData>()
+                documents.forEach { doc ->
+                    val comment = doc.toObject<CommentData>()
+                    newComments.add(comment)
+                }
+                val sortedComments = newComments.sortedBy { it.timeStamp }
+                comments.value = sortedComments
+                commentProgress.value = false
+
+            }
+            .addOnFailureListener {
+                handleExecption(it,"Can't load comments")
+                commentProgress.value = false
+            }
+    }
+
+    private fun getFollowers(uid: String?){
+        db.collection(USERS).whereArrayContains("following",uid?:"").get()
+            .addOnSuccessListener { documents ->
+                followers.value = documents.size()
+            }
+            .addOnFailureListener {
+
+            }
     }
 }

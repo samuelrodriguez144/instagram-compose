@@ -70,6 +70,7 @@ fun MyPostScreen(navController: NavController,vm:IGViewModel){
     val isLoading = vm.inProgress.value
     val postLoading = vm.refreshPostProgress.value
     val posts = vm.post.value
+    val followers = vm.followers.value
     
     Column {
         Column(modifier = Modifier.weight(1f)) {
@@ -77,17 +78,17 @@ fun MyPostScreen(navController: NavController,vm:IGViewModel){
                 ProfileImage(userData?.imageUrl){
                     newPostImageLauncher.launch("image/*")
                 }
-                Text(text = "15\nPosts",
+                Text(text = "${posts.size}\nPosts",
                     modifier = Modifier
                         .weight(1f)
                         .align(alignment = CenterVertically),
                     textAlign = TextAlign.Center)
-                Text(text = "15\nFollowers",
+                Text(text = "${followers}\nFollowers",
                     modifier = Modifier
                         .weight(1f)
                         .align(alignment = CenterVertically),
                     textAlign = TextAlign.Center)
-                Text(text = "15\nFollowing",
+                Text(text = "${userData?.following?.size ?: 0}\nFollowing",
                     modifier = Modifier
                         .weight(1f)
                         .align(alignment = CenterVertically),
@@ -120,7 +121,10 @@ fun MyPostScreen(navController: NavController,vm:IGViewModel){
                     isContextLoading = isLoading,
                     postLoading = postLoading,
                     posts = posts ,
-                    modifier = Modifier.weight(1f).padding(1.dp).fillMaxSize()
+                    modifier = Modifier
+                        .weight(1f)
+                        .padding(1.dp)
+                        .fillMaxSize()
                 ){ post ->
                     navigateTo(
                         navController = navController,
