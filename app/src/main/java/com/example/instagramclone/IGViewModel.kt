@@ -39,6 +39,9 @@ class IGViewModel @Inject constructor(
     val searchedPost = mutableStateOf<List<PostData>>(listOf())
     val searchedPostProgress = mutableStateOf(false)
 
+    val postFeed = mutableStateOf<List<PostData>>(listOf())
+    val postFeedProgress = mutableStateOf(false)
+
     init {
         val currentUser = auth.currentUser
         isSignedIn.value = currentUser != null
@@ -164,6 +167,7 @@ class IGViewModel @Inject constructor(
                 userData.value = user
                 inProgress.value = false
                 refreshPost()
+                getPersonalizedFeed()
             }
             .addOnFailureListener {
                 handleExecption(it,"Cannot retrieve user data")
@@ -239,6 +243,8 @@ class IGViewModel @Inject constructor(
         userData.value = null
         popupNotification.value = Event("Logged Out.")
         searchedPost.value = listOf()
+        postFeed.value = listOf()
+
     }
 
     fun onNewPost(uri:Uri, description:String, onPostSuccess:()->Unit){
@@ -358,6 +364,71 @@ class IGViewModel @Inject constructor(
                 .addOnSuccessListener {
                     getUserData(currentUser)
                 }
+        }
+    }
+
+    private fun getPersonalizedFeed(){
+        val following = userData.value?.following
+        postFeedProgress.value = true
+        if(!following.isNullOrEmpty()){
+            db.collection(POST).whereIn("userId",following).get()
+                .addOnSuccessListener {
+
+                    convertPosts(documents = it, outState = postFeed)
+                    if(postFeed.value.isEmpty()){
+                        getGeneralFeed()
+                    }
+                    else{
+                        postFeedProgress.value = false
+                    }
+                }
+                .addOnFailureListener {
+                    handleExecption(it,"Can't retrieve feed")
+                    postFeedProgress.value = false
+                }
+        }
+        else{
+            getGeneralFeed()
+        }
+    }
+
+    private fun getGeneralFeed(){
+        postFeedProgress.value = true
+        val currentTime = System.currentTimeMillis()
+        val difference = 24 * 60 * 60 * 1000
+        db.collection(POST).whereGreaterThan("time",currentTime - difference)
+            .get()
+            .addOnSuccessListener {
+                convertPosts(documents = it, outState = postFeed)
+                postFeedProgress.value = false
+            }
+            .addOnFailureListener {
+                handleExecption(it,"can't retrieve feed")
+                postFeedProgress.value = false
+            }
+    }
+
+    fun onLikePost(postData:PostData){
+        auth.currentUser?.uid?.let { userId ->
+            postData.likes?.let { likes ->
+                val newLikes = arrayListOf<String>()
+                if(likes.contains(userId)){
+                    newLikes.addAll(likes.filter { userId != it })
+                }
+                else{
+                    newLikes.addAll(likes)
+                    newLikes.add(userId)
+                }
+                postData.postId?.let { postId ->
+                    db.collection(POST).document(postId).update("likes",newLikes)
+                        .addOnSuccessListener {
+                            postData.likes = newLikes
+                        }
+                        .addOnFailureListener {
+                            handleExecption(it,"Unable to like post")
+                        }
+                }
+            }
         }
     }
 }
