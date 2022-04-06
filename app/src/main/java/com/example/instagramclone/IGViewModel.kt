@@ -5,6 +5,7 @@ import android.net.Uri
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
+import com.example.instagramclone.data.CommentData
 import com.example.instagramclone.data.Event
 import com.example.instagramclone.data.PostData
 import com.example.instagramclone.data.UserData
@@ -21,6 +22,8 @@ import javax.inject.Inject
 
 const val USERS = "users"
 const val POST = "posts"
+const val COMMENTS = "comments"
+
 @HiltViewModel
 class IGViewModel @Inject constructor(
     val auth: FirebaseAuth,
@@ -41,6 +44,11 @@ class IGViewModel @Inject constructor(
 
     val postFeed = mutableStateOf<List<PostData>>(listOf())
     val postFeedProgress = mutableStateOf(false)
+
+    val comments = mutableStateOf<List<CommentData>>(listOf())
+    val commentProgress = mutableStateOf(false)
+
+    val followers = mutableStateOf(0)
 
     init {
         val currentUser = auth.currentUser
@@ -168,6 +176,7 @@ class IGViewModel @Inject constructor(
                 inProgress.value = false
                 refreshPost()
                 getPersonalizedFeed()
+                getFollowers(user?.userId)
             }
             .addOnFailureListener {
                 handleExecption(it,"Cannot retrieve user data")
@@ -244,6 +253,7 @@ class IGViewModel @Inject constructor(
         popupNotification.value = Event("Logged Out.")
         searchedPost.value = listOf()
         postFeed.value = listOf()
+        comments.value = listOf()
 
     }
 
@@ -430,5 +440,57 @@ class IGViewModel @Inject constructor(
                 }
             }
         }
+    }
+
+    fun createComments(postId:String,text:String){
+        userData.value?.username?.let { userName ->
+            val commentId = UUID.randomUUID().toString()
+            val comment = CommentData(
+                commentId = commentId,
+                postId = postId,
+                userName = userName,
+                text = text,
+                timeStamp = System.currentTimeMillis()
+            )
+
+            db.collection(COMMENTS).document(commentId).set(comment)
+                .addOnSuccessListener {
+                    // get existing comment
+                    getComments(postId = postId)
+                }
+                .addOnFailureListener {
+                    handleExecption(it,"Failed to add comment")
+                }
+        }
+    }
+
+    fun getComments(postId: String?){
+        commentProgress.value = true
+        db.collection(COMMENTS).whereEqualTo("postId",postId).get()
+            .addOnSuccessListener { documents ->
+                val newComments = mutableListOf<CommentData>()
+                documents.forEach { doc ->
+                    val comment = doc.toObject<CommentData>()
+                    newComments.add(comment)
+                }
+                val sortedComments = newComments.sortedBy { it.timeStamp }
+                comments.value = sortedComments
+                commentProgress.value = false
+
+            }
+            .addOnFailureListener {
+                handleExecption(it,"Can't load comments")
+                commentProgress.value = false
+            }
+    }
+
+    private fun getFollowers(uid: String?){
+        db.collection(USERS).whereArrayContains("following",uid?:"").get()
+            .addOnSuccessListener { documents ->
+                followers.value = documents.size()
+            }
+            .addOnFailureListener {
+
+            }
     }
 }

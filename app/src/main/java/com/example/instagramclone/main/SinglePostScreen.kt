@@ -7,6 +7,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.Card
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -17,12 +18,17 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import coil.compose.rememberImagePainter
+import com.example.instagramclone.DestinationScreen
 import com.example.instagramclone.IGViewModel
 import com.example.instagramclone.R
 import com.example.instagramclone.data.PostData
 
 @Composable
 fun SinglePostScreen(navController: NavController,vm:IGViewModel,post:PostData){
+    val comments = vm.comments.value
+    LaunchedEffect(key1 = Unit){
+        vm.getComments(post.postId)
+    }
     post.userId?.let {
         Column(modifier = Modifier
             .fillMaxWidth()
@@ -30,13 +36,17 @@ fun SinglePostScreen(navController: NavController,vm:IGViewModel,post:PostData){
             .padding(8.dp)) {
             Text(text = "Back", modifier = Modifier.clickable { navController.popBackStack() })
             CommonDivider()
-            SinglePostDisplay(navController = navController, vm = vm, post = post)
+            SinglePostDisplay(navController = navController, vm = vm, post = post, nbComments = comments.size)
         }
     }
 }
 
 @Composable
-fun SinglePostDisplay(navController: NavController,vm: IGViewModel,post: PostData){
+fun SinglePostDisplay(
+    navController: NavController,
+    vm: IGViewModel,
+    post: PostData,
+    nbComments:Int){
     val userData = vm.userData.value
     Box(modifier = Modifier
         .fillMaxWidth()
@@ -101,6 +111,14 @@ fun SinglePostDisplay(navController: NavController,vm: IGViewModel,post: PostDat
     }
     
     Row(modifier = Modifier.padding(8.dp)) {
-        Text(text = "10 Comments",color = Color.Gray , modifier = Modifier.padding(8.dp))
+        Text(text = "$nbComments Comment(s)",
+            color = Color.Gray ,
+            modifier = Modifier
+                .padding(8.dp)
+                .clickable {
+                    post.postId?.let {
+                        navController.navigate(DestinationScreen.CommentsScreen.createRoute(it))
+                    }
+                })
     }
 }
