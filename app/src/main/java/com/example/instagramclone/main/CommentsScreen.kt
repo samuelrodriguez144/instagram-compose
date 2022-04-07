@@ -4,10 +4,7 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.material.Button
-import androidx.compose.material.Text
-import androidx.compose.material.TextField
-import androidx.compose.material.TextFieldDefaults
+import androidx.compose.material.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -22,7 +19,7 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.example.instagramclone.IGViewModel
 import com.example.instagramclone.data.CommentData
-import org.w3c.dom.Comment
+import com.example.instagramclone.ui.theme.spacing
 
 @Composable
 fun CommentsScreen(navController: NavController,vm:IGViewModel,postId:String){
@@ -37,31 +34,33 @@ fun CommentsScreen(navController: NavController,vm:IGViewModel,postId:String){
 
     Column(modifier = Modifier.fillMaxSize()) {
 
-        if(commentProgress){
-            Column(modifier = Modifier.fillMaxWidth(),
-                verticalArrangement = Arrangement.Center,
-                horizontalAlignment = Alignment.CenterHorizontally) {
+        when {
+            commentProgress -> {
+                Column(modifier = Modifier.fillMaxWidth(),
+                    verticalArrangement = Arrangement.Center,
+                    horizontalAlignment = Alignment.CenterHorizontally) {
                     CommonProgressSpinner()
+                }
             }
-        }
-        else if(comments.isEmpty()){
-            Column(modifier = Modifier.fillMaxWidth(),
-                verticalArrangement = Arrangement.Center,
-                horizontalAlignment = Alignment.CenterHorizontally) {
-                Text(text = "No Comments Available")
+            comments.isEmpty() -> {
+                Column(modifier = Modifier.fillMaxWidth(),
+                    verticalArrangement = Arrangement.Center,
+                    horizontalAlignment = Alignment.CenterHorizontally) {
+                    Text(text = "No Comments Available")
+                }
             }
-        }
-        else{
-            LazyColumn(modifier = Modifier.weight(1f)){
-                items(items = comments){ comment ->
-                    CommentRow(comment)
+            else -> {
+                LazyColumn(modifier = Modifier.weight(1f)){
+                    items(items = comments){ comment ->
+                        CommentRow(comment)
+                    }
                 }
             }
         }
 
         Row(modifier = Modifier
             .fillMaxWidth()
-            .padding(8.dp)) {
+            .padding(MaterialTheme.spacing.extraSmall)) {
             TextField(value = commentText, onValueChange = {commentText = it},
                 modifier = Modifier
                     .weight(1f)
@@ -91,7 +90,7 @@ fun CommentsScreen(navController: NavController,vm:IGViewModel,postId:String){
 fun CommentRow(comment: CommentData){
     Row(modifier = Modifier
         .fillMaxWidth()
-        .padding(8.dp)) {
+        .padding(MaterialTheme.spacing.extraSmall)) {
         Text(text = comment.userName ?: "" , fontWeight = FontWeight.Bold)
         Text(text = comment.text ?: "", modifier = Modifier.padding(start = 8.dp))
     }

@@ -6,6 +6,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.MaterialTheme
 import androidx.compose.material.OutlinedTextField
 import androidx.compose.material.Text
 import androidx.compose.material.TextFieldDefaults
@@ -19,6 +20,7 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import coil.compose.rememberImagePainter
 import com.example.instagramclone.IGViewModel
+import com.example.instagramclone.ui.theme.spacing
 
 
 @Composable
@@ -37,7 +39,7 @@ fun NewPostScreen(navController: NavController,vm:IGViewModel,encodedUri:String)
         .fillMaxWidth()) {
         Row(modifier = Modifier
             .fillMaxWidth()
-            .padding(8.dp),
+            .padding(MaterialTheme.spacing.extraSmall),
             horizontalArrangement = Arrangement.SpaceBetween) {
             Text(text = "Cancel", modifier = Modifier.clickable { navController.popBackStack() })
             Text(text = "Post", modifier = Modifier
@@ -56,7 +58,7 @@ fun NewPostScreen(navController: NavController,vm:IGViewModel,encodedUri:String)
                 .defaultMinSize(minHeight = 150.dp),
             contentScale = ContentScale.FillWidth)
         
-        Row(modifier = Modifier.padding(16.dp)) {
+        Row(modifier = Modifier.padding(MaterialTheme.spacing.medium)) {
             OutlinedTextField(value = description,
                 onValueChange = {description = it},
                 modifier = Modifier
