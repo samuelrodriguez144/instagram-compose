@@ -53,9 +53,7 @@ class MainActivity : ComponentActivity() {
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colors.background
                 ) {
-                    TopBarScreen(onItemSelected = {theme -> themeSetting.theme = theme})
                     InstagramApp()
-
                 }
             }
         }
@@ -189,13 +187,6 @@ fun TopBarScreen(
             )
         },
         content = {
-            Column(modifier = Modifier
-                .fillMaxSize()
-                .padding(MaterialTheme.spacing.medium),
-            verticalArrangement = Arrangement.Center,
-            horizontalAlignment = Alignment.CenterHorizontally) {
-                Text(text = "Test")
-            }
         }
     )
 
