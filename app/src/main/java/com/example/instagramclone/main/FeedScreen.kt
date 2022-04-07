@@ -9,8 +9,10 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.CornerSize
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Card
+import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
@@ -23,10 +25,8 @@ import androidx.navigation.NavController
 import com.example.instagramclone.DestinationScreen
 import com.example.instagramclone.IGViewModel
 import com.example.instagramclone.data.PostData
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
+import com.example.instagramclone.ui.theme.spacing
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
 
 @Composable
 fun FeedScreen(navController: NavController,vm:IGViewModel){
@@ -100,7 +100,10 @@ fun Post(
         modifier = Modifier
             .fillMaxWidth()
             .wrapContentHeight()
-            .padding(top = 4.dp, bottom = 4.dp)
+            .padding(
+                top = MaterialTheme.spacing.extraSmall,
+                bottom = MaterialTheme.spacing.extraSmall
+            )
     ) {
         Column {
             Row(modifier = Modifier
@@ -119,16 +122,15 @@ fun Post(
                 val modifier = Modifier
                     .fillMaxWidth()
                     .defaultMinSize(minHeight = 150.dp)
-                    .pointerInput(Unit){
+                    .pointerInput(Unit) {
                         detectTapGestures(
                             onDoubleTap = {
 
-                                if(post.likes?.contains(currentUserId) == true){
-                                              dislikeAnimation.value = true
-                                          }
-                                          else{
-                                              likeAnimation.value = true
-                                          }
+                                if (post.likes?.contains(currentUserId) == true) {
+                                    dislikeAnimation.value = true
+                                } else {
+                                    likeAnimation.value = true
+                                }
                                 vm.onLikePost(post)
                             },
                             onTap = {
@@ -142,7 +144,7 @@ fun Post(
                     contentScale = ContentScale.FillWidth
                 )
                 if(likeAnimation.value){
-                    CoroutineScope(Dispatchers.Main).launch {
+                    LaunchedEffect(key1 = likeAnimation.value){
                         delay(1000)
                         likeAnimation.value = false
                     }
@@ -150,7 +152,7 @@ fun Post(
                 }
 
                 if(dislikeAnimation.value){
-                    CoroutineScope(Dispatchers.Main).launch {
+                    LaunchedEffect(key1 = dislikeAnimation.value){
                         delay(1000)
                         dislikeAnimation.value = false
                     }

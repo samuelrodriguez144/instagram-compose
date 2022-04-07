@@ -2,9 +2,13 @@ package com.example.instagramclone.main
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.gestures.Orientation
+import androidx.compose.foundation.gestures.scrollable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.Card
+import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -22,6 +26,7 @@ import com.example.instagramclone.DestinationScreen
 import com.example.instagramclone.IGViewModel
 import com.example.instagramclone.R
 import com.example.instagramclone.data.PostData
+import com.example.instagramclone.ui.theme.spacing
 
 @Composable
 fun SinglePostScreen(navController: NavController,vm:IGViewModel,post:PostData){
@@ -33,7 +38,8 @@ fun SinglePostScreen(navController: NavController,vm:IGViewModel,post:PostData){
         Column(modifier = Modifier
             .fillMaxWidth()
             .wrapContentHeight()
-            .padding(8.dp)) {
+            .padding(MaterialTheme.spacing.small)
+            ) {
             Text(text = "Back", modifier = Modifier.clickable { navController.popBackStack() })
             CommonDivider()
             SinglePostDisplay(navController = navController, vm = vm, post = post, nbComments = comments.size)
@@ -114,7 +120,7 @@ fun SinglePostDisplay(
         Text(text = "$nbComments Comment(s)",
             color = Color.Gray ,
             modifier = Modifier
-                .padding(8.dp)
+                .padding(start = MaterialTheme.spacing.small)
                 .clickable {
                     post.postId?.let {
                         navController.navigate(DestinationScreen.CommentsScreen.createRoute(it))

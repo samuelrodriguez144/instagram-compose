@@ -14,6 +14,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.Card
 import androidx.compose.material.CircularProgressIndicator
 import androidx.compose.material.Divider
+import androidx.compose.material.MaterialTheme
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -31,6 +32,7 @@ import coil.compose.rememberImagePainter
 import com.example.instagramclone.DestinationScreen
 import com.example.instagramclone.IGViewModel
 import com.example.instagramclone.R
+import com.example.instagramclone.ui.theme.spacing
 
 @Composable
 fun NotificationMessage(vm:IGViewModel){
@@ -103,8 +105,8 @@ fun CommonImage(
 @Composable
 fun UserImageCard(userImage:String?,
                   modifier: Modifier = Modifier
-                      .padding(8.dp)
-                      .size(64.dp)){
+                      .padding(MaterialTheme.spacing.extraSmall)
+                      .size(MaterialTheme.spacing.extraLarge)){
     Card(shape = CircleShape, modifier = modifier) {
         if(userImage.isNullOrEmpty()){
             Image(painter = painterResource(id = R.drawable.ic_user),
@@ -126,7 +128,7 @@ fun CommonDivider(){
         thickness = 1.dp,
         modifier = Modifier
             .alpha(0.3f)
-            .padding(top = 8.dp, bottom = 8.dp)
+            .padding(top = MaterialTheme.spacing.extraSmall, bottom = MaterialTheme.spacing.extraSmall)
     )
 }
 
@@ -147,7 +149,7 @@ fun LikeAnimation(like: Boolean = true){
     }
     ) { state ->
         when(state){
-            LikeIconSize.SMALL -> 0.dp
+            LikeIconSize.SMALL -> MaterialTheme.spacing.default
             LikeIconSize.LARGE -> 150.dp
         }
 

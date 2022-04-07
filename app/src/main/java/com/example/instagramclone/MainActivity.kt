@@ -3,13 +3,18 @@ package com.example.instagramclone
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.Surface
-import androidx.compose.material.Text
+import androidx.compose.foundation.isSystemInDarkTheme
+import androidx.compose.foundation.layout.*
+import androidx.compose.material.*
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -20,23 +25,35 @@ import com.example.instagramclone.auth.SignupScreen
 import com.example.instagramclone.data.PostData
 import com.example.instagramclone.main.*
 import com.example.instagramclone.ui.theme.InstagramCloneTheme
+import com.example.instagramclone.ui.theme.spacing
+import com.example.instagramclone.utils.AppTheme
+import com.example.instagramclone.utils.ThemeSetting
 import dagger.hilt.android.AndroidEntryPoint
-import dagger.hilt.android.lifecycle.HiltViewModel
+import javax.inject.Inject
 
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
+
+    @Inject lateinit var themeSetting: ThemeSetting
+
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
-            InstagramCloneTheme {
+            val theme = themeSetting.themeStream.collectAsState()
+            val useDarkColors = when(theme.value){
+                AppTheme.MODE_AUTO -> isSystemInDarkTheme()
+                AppTheme.MODE_DAY -> false
+                AppTheme.MODE_NIGHT -> true
+            }
+            InstagramCloneTheme(darkTheme = useDarkColors) {
                 // A surface container using the 'background' color from the theme
                 Surface(
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colors.background
                 ) {
                     InstagramApp()
-
                 }
             }
         }
@@ -108,6 +125,71 @@ fun InstagramApp(){
             }
         }
     }
+}
+
+@Composable
+fun TopBarScreen(
+    onItemSelected: (AppTheme) -> Unit
+){
+    val menuExpanded = remember {
+        mutableStateOf(false)
+    }
+    Scaffold(
+        topBar = {
+            TopAppBar(
+                title = {
+                    Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically, horizontalArrangement =Arrangement.Center){
+                        Text(text = "Instagram")
+                    }
+                },
+                actions = {
+                    IconButton(
+                        onClick = {
+                            menuExpanded.value = true
+                        }) {
+                        Icon(Icons.Filled.MoreVert, contentDescription = null )
+                    }
+                    Column(modifier = Modifier.wrapContentSize(Alignment.TopStart)) {
+                        DropdownMenu(
+                            expanded = menuExpanded.value,
+                            onDismissRequest = {
+                                menuExpanded.value = false
+                            },
+                            modifier = Modifier
+                                .width(200.dp)
+                                .wrapContentSize(Alignment.TopStart)) {
+                                DropdownMenuItem(
+                                    onClick = {
+                                        onItemSelected(AppTheme.fromOrdinal(AppTheme.MODE_AUTO.ordinal))
+                                        menuExpanded.value = false
+                                    }) {
+                                    Text(text = "Auto")
+                                }
+
+                                DropdownMenuItem(
+                                    onClick = {
+                                        onItemSelected(AppTheme.fromOrdinal(AppTheme.MODE_DAY.ordinal))
+                                        menuExpanded.value = false
+                                    }) {
+                                    Text(text = "Light Theme")
+                                }
+
+                                DropdownMenuItem(
+                                    onClick = {
+                                        onItemSelected(AppTheme.fromOrdinal(AppTheme.MODE_NIGHT.ordinal))
+                                        menuExpanded.value = false
+                                    }) {
+                                    Text(text = "Night Theme")
+                                }
+                        }
+                    }
+                }
+            )
+        },
+        content = {
+        }
+    )
+
 }
 
 

@@ -12,11 +12,12 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.ButtonDefaults
-import androidx.compose.material.Card
-import androidx.compose.material.OutlinedButton
-import androidx.compose.material.Text
+import androidx.compose.material.*
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Alignment.Companion.BottomEnd
 import androidx.compose.ui.Alignment.Companion.CenterVertically
@@ -26,12 +27,17 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.example.instagramclone.DestinationScreen
 import com.example.instagramclone.IGViewModel
 import com.example.instagramclone.R
+import com.example.instagramclone.TopBarScreen
 import com.example.instagramclone.data.PostData
+import com.example.instagramclone.ui.theme.spacing
+import com.example.instagramclone.utils.AppTheme
 
 data class PostRow(
     var post1: PostData? = null,
@@ -57,7 +63,48 @@ data class PostRow(
 
 @Composable
 fun MyPostScreen(navController: NavController,vm:IGViewModel){
+    MyPostScreenTopBar(navController,vm)
 
+}
+
+@Composable
+fun MyPostScreenTopBar(navController: NavController,vm:IGViewModel){
+
+    val userData = vm.userData.value
+    val menuExpanded = remember {
+        mutableStateOf(false)
+    }
+    Scaffold(
+        topBar = {
+            TopAppBar(
+                title = {
+                    Row(modifier = Modifier.fillMaxWidth(),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement =Arrangement.Start){
+                        Text(text = userData?.username ?: "")
+                    }
+                },
+                actions = {
+                    IconButton(
+                        onClick = {
+                            menuExpanded.value = true
+                        }) {
+                        Icon(Icons.Filled.MoreVert, contentDescription = null )
+                    }
+                    Column(modifier = Modifier.wrapContentSize(Alignment.TopStart)) {
+                    }
+                }
+            )
+        },
+        content = {
+            MyPostScreenContent(navController = navController,vm=vm)
+        }
+    )
+
+}
+
+@Composable
+fun MyPostScreenContent(navController: NavController,vm:IGViewModel){
     val newPostImageLauncher = rememberLauncherForActivityResult(contract = ActivityResultContracts.GetContent()){ uri ->
         uri?.let {
             val encodedImage = Uri.encode(it.toString())
@@ -71,7 +118,7 @@ fun MyPostScreen(navController: NavController,vm:IGViewModel){
     val postLoading = vm.refreshPostProgress.value
     val posts = vm.post.value
     val followers = vm.followers.value
-    
+
     Column {
         Column(modifier = Modifier.weight(1f)) {
             Row() {
@@ -104,17 +151,17 @@ fun MyPostScreen(navController: NavController,vm:IGViewModel){
             OutlinedButton(onClick = {
                 navigateTo(navController = navController, dest = DestinationScreen.MyProfile)
             },
-            modifier = Modifier
-                .padding(8.dp)
-                .fillMaxWidth(),
-            colors = ButtonDefaults.buttonColors(backgroundColor = Color.Transparent),
-            elevation = ButtonDefaults.elevation(
-                defaultElevation = 0.dp,
-                pressedElevation = 0.dp,
-                disabledElevation = 0.dp
-            ),
-            shape = RoundedCornerShape(10)) {
-                Text(text = "Edit Profile", color = Color.Black)
+                modifier = Modifier
+                    .padding(MaterialTheme.spacing.small)
+                    .fillMaxWidth(),
+                colors = ButtonDefaults.buttonColors(backgroundColor = Color.Transparent),
+                elevation = ButtonDefaults.elevation(
+                    defaultElevation = 0.dp,
+                    pressedElevation = 0.dp,
+                    disabledElevation = 0.dp
+                ),
+                shape = RoundedCornerShape(10)) {
+                Text(text = "Edit Profile")
             }
             Column(modifier = Modifier.weight(1f)) {
                 PostList(
@@ -147,27 +194,28 @@ fun MyPostScreen(navController: NavController,vm:IGViewModel){
 
 @Composable
 fun ProfileImage(imageUrl:String?, onclick: ()->Unit){
-    
+
     Box(modifier = Modifier
-        .padding(top = 16.dp)
+        .padding(top = MaterialTheme.spacing.small)
         .clickable { onclick.invoke() }) {
 
         UserImageCard(
             userImage = imageUrl,
             modifier = Modifier
-                .padding(8.dp)
+                .padding(MaterialTheme.spacing.medium)
                 .size(80.dp))
 
-        Card(shape = CircleShape,
+        Card(
+            shape = CircleShape,
             border = BorderStroke(width = 2.dp, color = Color.White),
             modifier = Modifier
-                .size(32.dp)
+                .size(26.dp)
                 .align(BottomEnd)
-                .padding(bottom = 8.dp, end = 8.dp)) {
-            
-            Image(painter = painterResource(id = R.drawable.ic_plus), contentDescription =null, modifier = Modifier
-                .background(Color.Black)
-                 )
+                .offset(x=(-12).dp,y=(-12).dp)
+                ) {
+
+            Image(painter = painterResource(id = R.drawable.ic_plus), contentDescription = null, modifier = Modifier
+                .background(Color.Black))
         }
     }
 
@@ -250,3 +298,6 @@ fun PostImage(imageURL:String?,modifier: Modifier){
         CommonImage(data = imageURL, modifier = modifier, contentScale = ContentScale.Crop)
     }
 }
+
+
+
