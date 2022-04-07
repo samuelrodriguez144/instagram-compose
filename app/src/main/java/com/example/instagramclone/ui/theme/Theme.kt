@@ -40,7 +40,7 @@ fun InstagramCloneTheme(
     }
 
 
-    CompositionLocalProvider(LocalSpacing provides Spacing()) {
+    CompositionLocalProvider(LocalSpacing provides Spacing(), LocalColors provides Colors()) {
         MaterialTheme(
             colors = colors,
             typography = Typography,
