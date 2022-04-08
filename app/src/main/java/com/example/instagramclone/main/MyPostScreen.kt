@@ -14,7 +14,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.MoreVert
+import androidx.compose.material.icons.filled.Settings
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -27,17 +27,15 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.example.instagramclone.DestinationScreen
 import com.example.instagramclone.IGViewModel
 import com.example.instagramclone.R
-import com.example.instagramclone.TopBarScreen
 import com.example.instagramclone.data.PostData
+import com.example.instagramclone.ui.theme.PinkTheme
 import com.example.instagramclone.ui.theme.spacing
-import com.example.instagramclone.utils.AppTheme
+import com.example.instagramclone.ui.theme.animation.ShimmerAnimation
 
 data class PostRow(
     var post1: PostData? = null,
@@ -63,7 +61,10 @@ data class PostRow(
 
 @Composable
 fun MyPostScreen(navController: NavController,vm:IGViewModel){
-    MyPostScreenTopBar(navController,vm)
+
+    PinkTheme(darkTheme = false){
+        MyPostScreenTopBar(navController,vm)
+    }
 
 }
 
@@ -89,7 +90,7 @@ fun MyPostScreenTopBar(navController: NavController,vm:IGViewModel){
                         onClick = {
                             menuExpanded.value = true
                         }) {
-                        Icon(Icons.Filled.MoreVert, contentDescription = null )
+                        Icon(Icons.Filled.Settings, contentDescription = null )
                     }
                     Column(modifier = Modifier.wrapContentSize(Alignment.TopStart)) {
                     }
@@ -186,7 +187,7 @@ fun MyPostScreenContent(navController: NavController,vm:IGViewModel){
             navController = navController)
 
         if(isLoading){
-            CommonProgressSpinner()
+            ShimmerAnimation()
         }
     }
 }
@@ -211,7 +212,7 @@ fun ProfileImage(imageUrl:String?, onclick: ()->Unit){
             modifier = Modifier
                 .size(26.dp)
                 .align(BottomEnd)
-                .offset(x=(-12).dp,y=(-12).dp)
+                .offset(x = (-12).dp, y = (-12).dp)
                 ) {
 
             Image(painter = painterResource(id = R.drawable.ic_plus), contentDescription = null, modifier = Modifier

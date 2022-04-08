@@ -1,5 +1,6 @@
 package com.example.instagramclone.main
 
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.*
@@ -18,14 +19,19 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.example.instagramclone.DestinationScreen
 import com.example.instagramclone.IGViewModel
+import com.example.instagramclone.R
 import com.example.instagramclone.data.PostData
 import com.example.instagramclone.ui.theme.spacing
+import com.example.instagramclone.ui.theme.animation.ShimmerAnimation
 import kotlinx.coroutines.delay
 
 @Composable
@@ -81,7 +87,7 @@ fun PostLists(
             }
         }
         if(loading){
-            CommonProgressSpinner()
+            ShimmerAnimation()
         }
     }
 }
@@ -138,11 +144,18 @@ fun Post(
                             }
                         )
                     }
-                CommonImage(
-                    data = post.postImage,
-                    modifier = modifier,
-                    contentScale = ContentScale.FillWidth
-                )
+                Box{
+                    val modifier = Modifier
+                        .height(250.dp)
+                        .fillMaxWidth()
+                        .padding(MaterialTheme.spacing.extraSmall)
+                    CommonImage(
+                        data = post.postImage,
+                        modifier = modifier ,
+                        contentScale = ContentScale.FillBounds)
+                }
+
+
                 if(likeAnimation.value){
                     LaunchedEffect(key1 = likeAnimation.value){
                         delay(1000)

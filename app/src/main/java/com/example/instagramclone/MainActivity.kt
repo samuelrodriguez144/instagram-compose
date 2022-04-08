@@ -127,69 +127,6 @@ fun InstagramApp(){
     }
 }
 
-@Composable
-fun TopBarScreen(
-    onItemSelected: (AppTheme) -> Unit
-){
-    val menuExpanded = remember {
-        mutableStateOf(false)
-    }
-    Scaffold(
-        topBar = {
-            TopAppBar(
-                title = {
-                    Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically, horizontalArrangement =Arrangement.Center){
-                        Text(text = "Instagram")
-                    }
-                },
-                actions = {
-                    IconButton(
-                        onClick = {
-                            menuExpanded.value = true
-                        }) {
-                        Icon(Icons.Filled.MoreVert, contentDescription = null )
-                    }
-                    Column(modifier = Modifier.wrapContentSize(Alignment.TopStart)) {
-                        DropdownMenu(
-                            expanded = menuExpanded.value,
-                            onDismissRequest = {
-                                menuExpanded.value = false
-                            },
-                            modifier = Modifier
-                                .width(200.dp)
-                                .wrapContentSize(Alignment.TopStart)) {
-                                DropdownMenuItem(
-                                    onClick = {
-                                        onItemSelected(AppTheme.fromOrdinal(AppTheme.MODE_AUTO.ordinal))
-                                        menuExpanded.value = false
-                                    }) {
-                                    Text(text = "Auto")
-                                }
 
-                                DropdownMenuItem(
-                                    onClick = {
-                                        onItemSelected(AppTheme.fromOrdinal(AppTheme.MODE_DAY.ordinal))
-                                        menuExpanded.value = false
-                                    }) {
-                                    Text(text = "Light Theme")
-                                }
-
-                                DropdownMenuItem(
-                                    onClick = {
-                                        onItemSelected(AppTheme.fromOrdinal(AppTheme.MODE_NIGHT.ordinal))
-                                        menuExpanded.value = false
-                                    }) {
-                                    Text(text = "Night Theme")
-                                }
-                        }
-                    }
-                }
-            )
-        },
-        content = {
-        }
-    )
-
-}
 
 

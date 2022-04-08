@@ -174,7 +174,7 @@ fun ProfileImage(imageUrl:String?, vm:IGViewModel){
                 CommonImage(data = imageUrl)
                 
             }
-            Text(text = "Change Profile Pictur0e")
+            Text(text = "Change Profile Picture")
         }
 
         val isLoading = vm.inProgress.value

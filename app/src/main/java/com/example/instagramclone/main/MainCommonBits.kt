@@ -33,6 +33,7 @@ import com.example.instagramclone.DestinationScreen
 import com.example.instagramclone.IGViewModel
 import com.example.instagramclone.R
 import com.example.instagramclone.ui.theme.spacing
+import com.example.instagramclone.ui.theme.animation.ShimmerAnimation
 
 @Composable
 fun NotificationMessage(vm:IGViewModel){
@@ -57,6 +58,9 @@ fun CommonProgressSpinner(){
         CircularProgressIndicator()
     }
 }
+
+
+
 @Composable
 fun CheckSignedIn(navController: NavController,vm: IGViewModel){
     val alreadyLoggedIn = remember{ mutableStateOf(false) }
@@ -98,7 +102,7 @@ fun CommonImage(
         contentScale = contentScale)
 
     if(painter.state is ImagePainter.State.Loading){
-        CommonProgressSpinner()
+        ShimmerAnimation()
     }
 }
 
@@ -128,7 +132,10 @@ fun CommonDivider(){
         thickness = 1.dp,
         modifier = Modifier
             .alpha(0.3f)
-            .padding(top = MaterialTheme.spacing.extraSmall, bottom = MaterialTheme.spacing.extraSmall)
+            .padding(
+                top = MaterialTheme.spacing.extraSmall,
+                bottom = MaterialTheme.spacing.extraSmall
+            )
     )
 }
 

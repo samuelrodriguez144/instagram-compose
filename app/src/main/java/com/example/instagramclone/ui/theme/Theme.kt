@@ -26,6 +26,13 @@ private val LightColorPalette = lightColors(
     onBackground = Color.Black,
     onSurface = Color.Black,
     */
+
+)
+
+private val PinkLightColorPalette = lightColors(
+    primary = Pink300,
+    primaryVariant = Pink500,
+    secondary = Analogous200
 )
 
 @Composable
@@ -40,7 +47,9 @@ fun InstagramCloneTheme(
     }
 
 
-    CompositionLocalProvider(LocalSpacing provides Spacing(), LocalColors provides Colors()) {
+    CompositionLocalProvider(
+        LocalSpacing provides Spacing(),
+        LocalColors provides Colors()) {
         MaterialTheme(
             colors = colors,
             typography = Typography,
@@ -48,4 +57,28 @@ fun InstagramCloneTheme(
             content = content
         )
     }
+}
+
+@Composable
+fun PinkTheme(
+    darkTheme: Boolean = isSystemInDarkTheme(),
+    content: @Composable () -> Unit
+){
+    val colors = if (darkTheme) {
+        DarkColorPalette
+    } else {
+        PinkLightColorPalette
+    }
+
+    CompositionLocalProvider(
+        LocalSpacing provides Spacing(),
+        LocalColors provides Colors()) {
+        MaterialTheme(
+            colors = colors,
+            typography = Typography,
+            shapes = Shapes,
+            content = content
+        )
+    }
+
 }
