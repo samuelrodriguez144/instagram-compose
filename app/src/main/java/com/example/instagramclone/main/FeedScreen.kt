@@ -1,13 +1,11 @@
 package com.example.instagramclone.main
 
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.CornerSize
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Card
 import androidx.compose.material.MaterialTheme
@@ -18,20 +16,18 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.example.instagramclone.DestinationScreen
 import com.example.instagramclone.IGViewModel
-import com.example.instagramclone.R
 import com.example.instagramclone.data.PostData
-import com.example.instagramclone.ui.theme.spacing
 import com.example.instagramclone.ui.theme.animation.ShimmerAnimation
+import com.example.instagramclone.ui.theme.spacing
 import kotlinx.coroutines.delay
 
 @Composable
@@ -44,7 +40,7 @@ fun FeedScreen(navController: NavController,vm:IGViewModel){
 
     Column(modifier = Modifier
         .fillMaxSize()
-        .background(Color.LightGray)) {
+        .background(Color.White)) {
         Row(modifier = Modifier
             .fillMaxWidth()
             .wrapContentHeight()
@@ -53,7 +49,7 @@ fun FeedScreen(navController: NavController,vm:IGViewModel){
         }
         PostLists(
             posts = personalizedFeed,
-            modifier = Modifier.weight(1f),
+            modifier = Modifier.weight(1f).background(Color.White),
             loading = personalizedFeedLoading or userDataLoading,
             navController = navController,
             vm = vm,
@@ -101,8 +97,7 @@ fun Post(
 
     val likeAnimation  = remember { mutableStateOf(false) }
     val dislikeAnimation = remember { mutableStateOf(false)}
-    Card(
-        shape = RoundedCornerShape(corner = CornerSize(4.dp)),
+    Box(
         modifier = Modifier
             .fillMaxWidth()
             .wrapContentHeight()
@@ -119,14 +114,15 @@ fun Post(
                     Card(shape = CircleShape, modifier = Modifier
                         .padding(4.dp)
                         .size(32.dp)) {
-                        CommonImage(data = post.postImage, contentScale = ContentScale.Crop)
+                        CommonImage(data = post.userImage, contentScale = ContentScale.Crop)
                     }
                 Text(text = post.username ?: "" , modifier = Modifier.padding(4.dp))
             }
-            
-            Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
+
+            Box(modifier = Modifier.fillMaxWidth().clip(shape = RoundedCornerShape(10.dp)), contentAlignment = Alignment.Center) {
                 val modifier = Modifier
                     .fillMaxWidth()
+                    .aspectRatio(1f)
                     .defaultMinSize(minHeight = 150.dp)
                     .pointerInput(Unit) {
                         detectTapGestures(
@@ -144,17 +140,11 @@ fun Post(
                             }
                         )
                     }
-                Box{
-                    val modifier = Modifier
-                        .height(250.dp)
-                        .fillMaxWidth()
-                        .padding(MaterialTheme.spacing.extraSmall)
-                    CommonImage(
-                        data = post.postImage,
-                        modifier = modifier ,
-                        contentScale = ContentScale.FillBounds)
-                }
 
+                CommonImage(
+                    data = post.postImage,
+                    modifier = modifier ,
+                    contentScale = ContentScale.FillBounds)
 
                 if(likeAnimation.value){
                     LaunchedEffect(key1 = likeAnimation.value){
@@ -173,6 +163,9 @@ fun Post(
                 }
 
             }
+            Text(text = post.username ?: "", fontWeight = FontWeight.Bold, modifier = Modifier.padding(start = 4.dp, top = 4.dp))
+            Text(text = post.postDescription ?: "", modifier = Modifier.padding(start = 4.dp, bottom = 4.dp))
+
         }
     }
 }

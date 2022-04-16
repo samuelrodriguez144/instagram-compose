@@ -22,6 +22,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Alignment.Companion.BottomEnd
 import androidx.compose.ui.Alignment.Companion.CenterVertically
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
@@ -208,15 +209,25 @@ fun ProfileImage(imageUrl:String?, onclick: ()->Unit){
 
         Card(
             shape = CircleShape,
-            border = BorderStroke(width = 2.dp, color = Color.White),
+            border = BorderStroke(width = 1.dp, color = Color.Transparent),
             modifier = Modifier
                 .size(26.dp)
                 .align(BottomEnd)
                 .offset(x = (-12).dp, y = (-12).dp)
                 ) {
+            Surface(
+                color = Color.Transparent,
+                modifier = Modifier.fillMaxSize()
+            ){
+                Image(
+                    painter = painterResource(id = R.drawable.ic_camera),
+                    contentDescription = null,
+                    modifier = Modifier
+                    .padding(2.dp)
+                )
+            }
 
-            Image(painter = painterResource(id = R.drawable.ic_plus), contentDescription = null, modifier = Modifier
-                .background(Color.Black))
+
         }
     }
 

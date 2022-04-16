@@ -3,6 +3,7 @@
     package="com.example.instagramclone">
 
     <uses-permission android:name="android.permission.INTERNET"/>
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"/>
 
     <application
         android:name=".InstagramCloneApplication"
@@ -11,11 +12,10 @@
         android:label="@string/app_name"
         android:roundIcon="@drawable/app_logo"
         android:supportsRtl="true"
-        android:theme="@style/Theme.InstagramClone">
+        android:theme="@style/Theme.InstagramClone">    
         <activity
             android:name=".MainActivity"
             android:exported="true"
-            android:label="@string/app_name"
             android:theme="@style/Theme.InstagramClone"
             android:windowSoftInputMode="adjustResize">
             <intent-filter>
